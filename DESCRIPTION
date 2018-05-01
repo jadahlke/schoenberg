@@ -1,0 +1,13 @@
+Package: schoenberg
+Type: Package
+Title: Twelve-Tone Musical Composition Package for R
+Version: 1.0.0
+Date: 2018-05-01
+Author: Jeffrey A. Dahlke <dahlk068@umn.edu>
+Maintainer: Jeffrey A. Dahlke <dahlk068@umn.edu>
+Description: Functions for creating and manipulating 12-tone (dodecaphonic) musical matrices using Arnold Schoenberg's serialism technique. This package can generate random 12-tone matrices and can generate matrices using a pre-determined sequence of notes.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+NeedsCompilation: no
