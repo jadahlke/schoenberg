@@ -11,5 +11,5 @@ The `schoenberg` package offers functions for creating and manipulating 12-tone 
 To install the `schoenberg` package, execute the following code in your R console:
 ```r
 install.packages("devtools")
-devtools::install_github("jadahlke/psychmeta")
+devtools::install_github("jadahlke/schoenberg")
 ```
