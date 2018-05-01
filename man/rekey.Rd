@@ -2,31 +2,34 @@
 % Please edit documentation in R/schoenberg.R
 \name{rekey}
 \alias{rekey}
-\title{Re-express a "schoenberg" class object with a different leading tone or accidental.}
+\title{Re-express a "schoenberg" class object with a different lead tone or different notation of accidentals.}
 \usage{
-rekey(tone_mat, lead_tone = NULL, use_sharps = TRUE)
+rekey(tone_mat, tone0 = NULL, accidentals = NULL)
 }
 \arguments{
 \item{tone_mat}{Object of the class "schoenberg" produced by the \code{schoenberg()} function.}
 
-\item{lead_tone}{Name of the note to use as the leading tone of the matrix.}
+\item{tone0}{\emph{Optional}: Name of the note to use as the lead tone of the matrix.}
 
-\item{use_sharps}{Logical scalar that determines whether accidentals should be represented as sharps (\code{TRUE}; default) or flats (\code{FALSE}).}
+\item{accidentals}{\emph{Optional}: Character scalar that determines whether accidentals should be represented as sharps (\code{accidentals} = "sharps") or flats (\code{accidentals} = "flats"); default value is \code{NULL}.
+When \code{accidentals} is \code{NULL}, matrices created from pre-specified vectors of notes will use the original set of accidentals, whereas
+random matrices and matrices created from vectors of numeric indices will default to sharp notation.}
 }
 \value{
-A 12-tone matrix of the "schoenberg" class.
+A 12-tone matrix of the "schoenberg" class with prime series on the rows and inverted series on the columns.
 }
 \description{
-Re-express a "schoenberg" class object with a different leading tone or accidental.
+Re-express a "schoenberg" class object with a different lead tone or different notation of accidentals.
 }
 \examples{
-## Let's create a vector of notes to use in creating our inital 'tone_mat' matrix:
-prime01 <- c("F#", "F", "D", "E", "D#", "C", "A", "C#", "G#", "B", "A#", "G")
+# Let's create a vector of notes to use in creating our inital 'tone_mat' matrix based
+# on Schoenberg's Walzer from Opus 23
+prime01 <- c("C#", "A", "B", "G", "Ab", "F#", "A#", "D", "E", "Eb", "C", "F")
 tone_mat <- schoenberg(prime0 = prime01)
 
-# Now, let's change the leading tone to "C":
-rekey(tone_mat = tone_mat, lead_tone = "C")
+# Now, let's change the lead tone to "C":
+rekey(tone_mat = tone_mat, tone0 = "C")
 
 # And let's also change the accidentals to flats:
-rekey(tone_mat = tone_mat, lead_tone = "C", use_sharps = FALSE)
+rekey(tone_mat = tone_mat, tone0 = "C", accidentals = "flats")
 }

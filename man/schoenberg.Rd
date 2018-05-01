@@ -2,26 +2,28 @@
 % Please edit documentation in R/schoenberg.R
 \name{schoenberg}
 \alias{schoenberg}
-\title{Generate a 12-tone (dodecaphonic) serialist matrix using Arnold Schoenberg's technique.}
+\title{Generate a 12-tone matrix using Arnold Schoenberg's serialism technique.}
 \usage{
-schoenberg(prime0 = NULL, lead_tone = NULL, use_sharps = TRUE,
-  seed = NULL)
+schoenberg(prime0 = NULL, tone0 = NULL, accidentals = NULL, seed = NULL)
 }
 \arguments{
-\item{prime0}{Optional vector of notes or numeric note indices to use in forming the matrix.
-If the vector is numeric, the values must span from 0 - 11 (unless \code{lead_tone} is specified, note 0 will be treated as "C").}
+\item{prime0}{\emph{Optional}: Vector of notes or numeric note indices to use in forming the matrix.
+If the vector is numeric, the values must span from 0 - 11, where 0 is the lead tone (unless \code{tone0} is specified, note 0 will be treated as "C").
+If supplying note names, use capital letters for the note names, use "#" to indicate sharps, and use "b" to indicate flats.}
 
-\item{lead_tone}{Name of the note to use as the leading tone of the matrix.}
+\item{tone0}{\emph{Optional}: Name of the note to use as the lead tone of the matrix.}
 
-\item{use_sharps}{Logical scalar that determines whether accidentals should be represented as sharps (\code{TRUE}; default) or flats (\code{FALSE}).}
+\item{accidentals}{\emph{Optional}: Character scalar that determines whether accidentals should be represented as sharps (\code{accidentals} = "sharps") or flats (\code{accidentals} = "flats"); default value is \code{NULL}.
+When \code{accidentals} is \code{NULL}, matrices created from pre-specified vectors of notes will use the original set of accidentals, whereas
+random matrices and matrices created from vectors of numeric indices will default to sharp notation.}
 
-\item{seed}{Optional seed value to use in generating random matrices. Set this to a numeric value when matrices need to be reproducible.}
+\item{seed}{\emph{Optional}: Seed value to use in generating random matrices. Set this to a numeric value when matrices need to be reproducible.}
 }
 \value{
-A 12-tone matrix of the "schoenberg" class.
+A 12-tone matrix of the "schoenberg" class with prime series on the rows and inverted series on the columns.
 }
 \description{
-Generate a 12-tone (dodecaphonic) serialist matrix using Arnold Schoenberg's technique.
+Generate a 12-tone matrix using Arnold Schoenberg's serialism technique.
 }
 \examples{
 #### Generating Random 12-Tone Matrices ####
@@ -33,11 +35,14 @@ schoenberg(seed = 42)
 
 
 #### Generating 12-Tone Matrices From a Specified Vector of Notes ####
-# For illustration, let's create two equivalent vectors of note information...
-# one vector with note labels:
-prime01 <- c("F#", "F", "D", "E", "D#", "C", "A", "C#", "G#", "B", "A#", "G")
-# and another vector with numeric indices of notes:
-prime02 <- c(6, 5, 2, 4, 3, 0, 9, 1, 8, 11, 10, 7)
+# For illustration, let's create two equivalent vectors of note information
+# for Schoenberg's first 12-tone serialist work: Walzer from Opus 23.
+
+# First, let's create one vector with note labels:
+prime01 <- c("C#", "A", "B", "G", "Ab", "F#", "A#", "D", "E", "Eb", "C", "F")
+
+# Next, let's create an equivalent vector using numeric indices instead of notes:
+prime02 <- c(1, 9, 11, 7, 8, 6, 10, 2, 4, 3, 0, 5)
 
 
 # Now, let's generate a 12-tone matrix from our note-based vector:
@@ -46,27 +51,34 @@ schoenberg(prime0 = prime01)
 # And let's generate a matrix from our number-based vector:
 schoenberg(prime0 = prime02)
 
+# Schoenberg used a mix of sharps and flats in his notation, wich lost in translation with the
+# numeric-index approach. Let's re-create our note-based matrix using only sharps:
+schoenberg(prime0 = prime01, accidentals = "sharps")
+
 # These two approaches produce identical outputs:
-all(schoenberg(prime0 = prime01) == schoenberg(prime0 = prime02))
+all(schoenberg(prime0 = prime01, accidentals = "sharps") == schoenberg(prime0 = prime02))
 
 
-# schoenberg() uses sharp notation by default, but matrices can be generated
-# with flat notation by setting use_sharps to FALSE:
-schoenberg(prime0 = prime01, use_sharps = FALSE)
-schoenberg(prime0 = prime02, use_sharps = FALSE)
+# Matrices can also be generated with flat notation by setting accidentals to "flats":
+schoenberg(prime0 = prime01, accidentals = "flats")
+schoenberg(prime0 = prime02, accidentals = "flats")
 
 # As before, these two approaches produce identical outputs:
-all(schoenberg(prime0 = prime01, use_sharps = FALSE) ==
-         schoenberg(prime0 = prime02, use_sharps = FALSE))
+all(schoenberg(prime0 = prime01, accidentals = "flats") ==
+         schoenberg(prime0 = prime02, accidentals = "flats"))
 
 
 # We can also manipulate the output of the schoenberg() function
-# so that the leading tone of the matrix is a particular note.
+# so that the lead tone of the matrix is a particular note.
 # This works with either note-based or number-based input vectors:
-schoenberg(prime0 = prime01, lead_tone = "C")
-schoenberg(prime0 = prime02, lead_tone = "C")
+schoenberg(prime0 = prime01, tone0 = "C", accidentals = "sharps")
+schoenberg(prime0 = prime02, tone0 = "C")
 
 # And, as before, these two approaches produce identical outputs:
-all(schoenberg(prime0 = prime01, lead_tone = "C") ==
-         schoenberg(prime0 = prime02, lead_tone = "C"))
+all(schoenberg(prime0 = prime01, tone0 = "C", accidentals = "sharps") ==
+         schoenberg(prime0 = prime02, tone0 = "C"))
+}
+\references{
+Schoenberg, A. (1923). \emph{Fünf klavierstücke [Five piano pieces], Op. 23, Movement 5: Walzer}.
+Copenhagen, Denmark: Wilhelm Hansen.
 }

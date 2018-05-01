@@ -1,13 +1,20 @@
-#' Generate a 12-tone (dodecaphonic) serialist matrix using Arnold Schoenberg's technique.
+#' Generate a 12-tone matrix using Arnold Schoenberg's serialism technique.
 #'
-#' @param prime0 Optional vector of notes or numeric note indices to use in forming the matrix.
-#' If the vector is numeric, the values must span from 0 - 11 (unless \code{lead_tone} is specified, note 0 will be treated as "C").
-#' @param lead_tone Name of the note to use as the leading tone of the matrix.
-#' @param use_sharps Logical scalar that determines whether accidentals should be represented as sharps (\code{TRUE}; default) or flats (\code{FALSE}).
-#' @param seed Optional seed value to use in generating random matrices. Set this to a numeric value when matrices need to be reproducible.
+#' @param prime0 \emph{Optional}: Vector of notes or numeric note indices to use in forming the matrix.
+#' If the vector is numeric, the values must span from 0 - 11, where 0 is the lead tone (unless \code{tone0} is specified, note 0 will be treated as "C").
+#' If supplying note names, use capital letters for the note names, use "#" to indicate sharps, and use "b" to indicate flats.
+#' @param tone0 \emph{Optional}: Name of the note to use as the lead tone of the matrix.
+#' @param accidentals \emph{Optional}: Character scalar that determines whether accidentals should be represented as sharps (\code{accidentals} = "sharps") or flats (\code{accidentals} = "flats"); default value is \code{NULL}.
+#' When \code{accidentals} is \code{NULL}, matrices created from pre-specified vectors of notes will use the original set of accidentals, whereas
+#' random matrices and matrices created from vectors of numeric indices will default to sharp notation.
+#' @param seed \emph{Optional}: Seed value to use in generating random matrices. Set this to a numeric value when matrices need to be reproducible.
 #'
-#' @return A 12-tone matrix of the "schoenberg" class.
+#' @return A 12-tone matrix of the "schoenberg" class with prime series on the rows and inverted series on the columns.
 #' @export
+#'
+#' @references
+#' Schoenberg, A. (1923). \emph{Fünf klavierstücke [Five piano pieces], Op. 23, Movement 5: Walzer}.
+#' Copenhagen, Denmark: Wilhelm Hansen.
 #'
 #' @examples
 #' #### Generating Random 12-Tone Matrices ####
@@ -19,11 +26,14 @@
 #'
 #'
 #' #### Generating 12-Tone Matrices From a Specified Vector of Notes ####
-#' # For illustration, let's create two equivalent vectors of note information...
-#' # one vector with note labels:
-#' prime01 <- c("F#", "F", "D", "E", "D#", "C", "A", "C#", "G#", "B", "A#", "G")
-#' # and another vector with numeric indices of notes:
-#' prime02 <- c(6, 5, 2, 4, 3, 0, 9, 1, 8, 11, 10, 7)
+#' # For illustration, let's create two equivalent vectors of note information
+#' # for Schoenberg's first 12-tone serialist work: Walzer from Opus 23.
+#'
+#' # First, let's create one vector with note labels:
+#' prime01 <- c("C#", "A", "B", "G", "Ab", "F#", "A#", "D", "E", "Eb", "C", "F")
+#'
+#' # Next, let's create an equivalent vector using numeric indices instead of notes:
+#' prime02 <- c(1, 9, 11, 7, 8, 6, 10, 2, 4, 3, 0, 5)
 #'
 #'
 #' # Now, let's generate a 12-tone matrix from our note-based vector:
@@ -32,95 +42,73 @@
 #' # And let's generate a matrix from our number-based vector:
 #' schoenberg(prime0 = prime02)
 #'
+#' # Schoenberg used a mix of sharps and flats in his notation, wich lost in translation with the
+#' # numeric-index approach. Let's re-create our note-based matrix using only sharps:
+#' schoenberg(prime0 = prime01, accidentals = "sharps")
+#'
 #' # These two approaches produce identical outputs:
-#' all(schoenberg(prime0 = prime01) == schoenberg(prime0 = prime02))
+#' all(schoenberg(prime0 = prime01, accidentals = "sharps") == schoenberg(prime0 = prime02))
 #'
 #'
-#' # schoenberg() uses sharp notation by default, but matrices can be generated
-#' # with flat notation by setting use_sharps to FALSE:
-#' schoenberg(prime0 = prime01, use_sharps = FALSE)
-#' schoenberg(prime0 = prime02, use_sharps = FALSE)
+#' # Matrices can also be generated with flat notation by setting accidentals to "flats":
+#' schoenberg(prime0 = prime01, accidentals = "flats")
+#' schoenberg(prime0 = prime02, accidentals = "flats")
 #'
 #' # As before, these two approaches produce identical outputs:
-#' all(schoenberg(prime0 = prime01, use_sharps = FALSE) ==
-#'          schoenberg(prime0 = prime02, use_sharps = FALSE))
+#' all(schoenberg(prime0 = prime01, accidentals = "flats") ==
+#'          schoenberg(prime0 = prime02, accidentals = "flats"))
 #'
 #'
 #' # We can also manipulate the output of the schoenberg() function
-#' # so that the leading tone of the matrix is a particular note.
+#' # so that the lead tone of the matrix is a particular note.
 #' # This works with either note-based or number-based input vectors:
-#' schoenberg(prime0 = prime01, lead_tone = "C")
-#' schoenberg(prime0 = prime02, lead_tone = "C")
+#' schoenberg(prime0 = prime01, tone0 = "C", accidentals = "sharps")
+#' schoenberg(prime0 = prime02, tone0 = "C")
 #'
 #' # And, as before, these two approaches produce identical outputs:
-#' all(schoenberg(prime0 = prime01, lead_tone = "C") ==
-#'          schoenberg(prime0 = prime02, lead_tone = "C"))
-schoenberg <- function(prime0 = NULL, lead_tone = NULL, use_sharps = TRUE, seed = NULL){
-     if(!is.logical(use_sharps))
-          stop("'use_sharps' must be logical", call. = FALSE)
+#' all(schoenberg(prime0 = prime01, tone0 = "C", accidentals = "sharps") ==
+#'          schoenberg(prime0 = prime02, tone0 = "C"))
+schoenberg <- function(prime0 = NULL, tone0 = NULL, accidentals = NULL, seed = NULL){
+     if(!is.null(accidentals)){
+          if(!is.character(accidentals))
+               stop("When 'accidentals' is not NULL, it must be a character scalar", call. = FALSE)
 
-     if(length(use_sharps) > 1){
-          use_sharps <- use_sharps[1]
-          warning("'use_sharps' must be a scalar - only the first value was used", call. = FALSE)
+          if(length(accidentals) > 1){
+               accidentals <- accidentals[1]
+               warning("When 'accidentals' is not NULL, it must be a scalar - only the first value was used", call. = FALSE)
+          }
      }
 
      set.seed(seed)
      if(is.null(prime0)) prime0 <- sample(0:11, 12)
 
-     if(!is.numeric(prime0)){
-          prime0 <- as.character(prime0)
+     note_list <- list("0" = c("B#", "C", "Dbb"),
+                       "1" = c("C#", "Db"),
+                       "2" = c("D", "C##", "Ebb"),
+                       "3" = c("D#", "Eb"),
+                       "4" = c("E", "Fb", "D##"),
+                       "5" = c("F", "E#", "Gbb"),
+                       "6" = c("F#", "Gb"),
+                       "7" = c("G", "F##", "Abb"),
+                       "8" = c("G#", "Ab"),
+                       "9" = c("A", "G##", "Bbb"),
+                       "10" = c("A#", "Bb"),
+                       "11" = c("B", "Cb"))
+     note_vec <- unlist(note_list)
 
-          note_vec <- c("B#", "C",
-                        "C#", "Db",
-                        "D",
-                        "D#", "Eb",
-                        "E", "Fb",
-                        "F", "E#",
-                        "F#", "Gb",
-                        "G",
-                        "G#", "Ab",
-                        "A",
-                        "A#", "Bb",
-                        "B", "Cb")
+     if(!is.numeric(prime0)){
+          .prime0 <- prime0 <- as.character(prime0)
 
           if(!all(prime0 %in% note_vec))
                stop("Notes in 'prime0' are limited to the following notation: \n", paste(note_vec, collapse = ", "), call. = FALSE)
 
-          prime0[prime0 == "B#"] <- "0"
-          prime0[prime0 == "C"] <- "0"
-
-          prime0[prime0 == "C#"] <- "1"
-          prime0[prime0 == "Db"] <- "1"
-
-          prime0[prime0 == "D"]  <- "2"
-
-          prime0[prime0 == "D#"] <- "3"
-          prime0[prime0 == "Eb"] <- "3"
-
-          prime0[prime0 == "E"]  <- "4"
-          prime0[prime0 == "Fb"]  <- "4"
-
-          prime0[prime0 == "E#"]  <- "5"
-          prime0[prime0 == "F"]  <- "5"
-
-          prime0[prime0 == "F#"] <- "6"
-          prime0[prime0 == "Gb"] <- "6"
-
-          prime0[prime0 == "G"]  <- "7"
-
-          prime0[prime0 == "G#"] <- "8"
-          prime0[prime0 == "Ab"] <- "8"
-
-          prime0[prime0 == "A"]  <- "9"
-
-          prime0[prime0 == "A#"] <- "10"
-          prime0[prime0 == "Bb"] <- "10"
-
-          prime0[prime0 == "B"]  <- "11"
-          prime0[prime0 == "Cb"]  <- "11"
+          for(i in as.character(0:11)) prime0[prime0 %in% note_list[[i]]] <- i
 
           prime0 <- as.numeric(prime0)
           .key <- NULL
+     }else{
+          if(is.null(accidentals))
+               accidentals <- "sharps"
      }
 
      if(!all(prime0 <= 11 & prime0 >= 0))
@@ -132,56 +120,11 @@ schoenberg <- function(prime0 = NULL, lead_tone = NULL, use_sharps = TRUE, seed 
      if(any(duplicated(prime0)))
           stop("Notes in 'prime0' must be unique", call. = FALSE)
 
-     if(!is.null(lead_tone)){
-          if(lead_tone == "C") .key <- 0
-          if(lead_tone == "C#") .key <- 1
-          if(lead_tone == "D") .key <- 2
-          if(lead_tone == "D#") .key <- 3
-          if(lead_tone == "E") .key <- 4
-          if(lead_tone == "F") .key <- 5
-          if(lead_tone == "F#") .key <- 6
-          if(lead_tone == "G") .key <- 7
-          if(lead_tone == "G#") .key <- 8
-          if(lead_tone == "A") .key <- 9
-          if(lead_tone == "A#") .key <- 10
-          if(lead_tone == "B") .key <- 11
-
-          if(lead_tone == "B#") .key <- 0
-          if(lead_tone == "C") .key <- 0
-
-          if(lead_tone == "C#") .key <- 1
-          if(lead_tone == "Db") .key <- 1
-
-          if(lead_tone == "D") .key  <- 2
-
-          if(lead_tone == "D#") .key <- 3
-          if(lead_tone == "Eb") .key <- 3
-
-          if(lead_tone == "E") .key  <- 4
-          if(lead_tone == "Fb") .key  <- 4
-
-          if(lead_tone == "E#") .key  <- 5
-          if(lead_tone == "F") .key  <- 5
-
-          if(lead_tone == "F#") .key <- 6
-          if(lead_tone == "Gb") .key <- 6
-
-          if(lead_tone == "G") .key  <- 7
-
-          if(lead_tone == "G#") .key <- 8
-          if(lead_tone == "Ab") .key <- 8
-
-          if(lead_tone == "A") .key  <- 9
-
-          if(lead_tone == "A#") .key <- 10
-          if(lead_tone == "Bb") .key <- 10
-
-          if(lead_tone == "B") .key  <- 11
-          if(lead_tone == "Cb") .key  <- 11
+     if(!is.null(tone0)){
+          .key <- as.numeric(names(which(unlist(lapply(note_list, function(x) tone0 %in% x)))))
      }else{
           .key <- NULL
      }
-
 
      key <- prime0[1]
      prime0 <- prime0 - key
@@ -212,20 +155,10 @@ schoenberg <- function(prime0 = NULL, lead_tone = NULL, use_sharps = TRUE, seed 
      out[out > 11] <- out[out > 11] - 12
      out[1:length(out)] <- as.character(out)
 
-     if(use_sharps){
-          out[out == "0"] <- "C"
-          out[out == "1"] <- "C#"
-          out[out == "2"] <- "D"
-          out[out == "3"] <- "D#"
-          out[out == "4"] <- "E"
-          out[out == "5"] <- "F"
-          out[out == "6"] <- "F#"
-          out[out == "7"] <- "G"
-          out[out == "8"] <- "G#"
-          out[out == "9"] <- "A"
-          out[out == "10"] <- "A#"
-          out[out == "11"] <- "B"
-     }else{
+     if(is.null(accidentals)){
+          for(i in as.character(0:11))
+               out[out == i] <- .prime0[.prime0 %in% note_list[[i]]]
+     }else if(accidentals == "flats"){
           out[out == "0"] <- "C"
           out[out == "1"] <- "Db"
           out[out == "2"] <- "D"
@@ -238,6 +171,19 @@ schoenberg <- function(prime0 = NULL, lead_tone = NULL, use_sharps = TRUE, seed 
           out[out == "9"] <- "A"
           out[out == "10"] <- "Bb"
           out[out == "11"] <- "B"
+     }else if(accidentals == "sharps"){
+          out[out == "0"] <- "C"
+          out[out == "1"] <- "C#"
+          out[out == "2"] <- "D"
+          out[out == "3"] <- "D#"
+          out[out == "4"] <- "E"
+          out[out == "5"] <- "F"
+          out[out == "6"] <- "F#"
+          out[out == "7"] <- "G"
+          out[out == "8"] <- "G#"
+          out[out == "9"] <- "A"
+          out[out == "10"] <- "A#"
+          out[out == "11"] <- "B"
      }
 
      out <- data.frame(out)
@@ -247,29 +193,32 @@ schoenberg <- function(prime0 = NULL, lead_tone = NULL, use_sharps = TRUE, seed 
 
 
 
-#' Re-express a "schoenberg" class object with a different leading tone or accidental.
+#' Re-express a "schoenberg" class object with a different lead tone or different notation of accidentals.
 #'
 #' @param tone_mat Object of the class "schoenberg" produced by the \code{schoenberg()} function.
-#' @param lead_tone Name of the note to use as the leading tone of the matrix.
-#' @param use_sharps Logical scalar that determines whether accidentals should be represented as sharps (\code{TRUE}; default) or flats (\code{FALSE}).
+#' @param tone0 \emph{Optional}: Name of the note to use as the lead tone of the matrix.
+#' @param accidentals \emph{Optional}: Character scalar that determines whether accidentals should be represented as sharps (\code{accidentals} = "sharps") or flats (\code{accidentals} = "flats"); default value is \code{NULL}.
+#' When \code{accidentals} is \code{NULL}, matrices created from pre-specified vectors of notes will use the original set of accidentals, whereas
+#' random matrices and matrices created from vectors of numeric indices will default to sharp notation.
 #'
-#' @return A 12-tone matrix of the "schoenberg" class.
+#' @return A 12-tone matrix of the "schoenberg" class with prime series on the rows and inverted series on the columns.
 #' @export
 #'
 #' @examples
-#' ## Let's create a vector of notes to use in creating our inital 'tone_mat' matrix:
-#' prime01 <- c("F#", "F", "D", "E", "D#", "C", "A", "C#", "G#", "B", "A#", "G")
+#' # Let's create a vector of notes to use in creating our inital 'tone_mat' matrix based
+#' # on Schoenberg's Walzer from Opus 23
+#' prime01 <- c("C#", "A", "B", "G", "Ab", "F#", "A#", "D", "E", "Eb", "C", "F")
 #' tone_mat <- schoenberg(prime0 = prime01)
 #'
-#' # Now, let's change the leading tone to "C":
-#' rekey(tone_mat = tone_mat, lead_tone = "C")
+#' # Now, let's change the lead tone to "C":
+#' rekey(tone_mat = tone_mat, tone0 = "C")
 #'
 #' # And let's also change the accidentals to flats:
-#' rekey(tone_mat = tone_mat, lead_tone = "C", use_sharps = FALSE)
-rekey <- function(tone_mat, lead_tone = NULL, use_sharps = TRUE){
+#' rekey(tone_mat = tone_mat, tone0 = "C", accidentals = "flats")
+rekey <- function(tone_mat, tone0 = NULL, accidentals = NULL){
      if(!("schoenberg" %in% class(tone_mat) ))
           stop("'tone_mat' must be of class 'schoenberg'", call. = FALSE)
-     schoenberg(prime0 = as.matrix(tone_mat)[1,], lead_tone = lead_tone, use_sharps = use_sharps)
+     schoenberg(prime0 = as.matrix(tone_mat)[1,], tone0 = tone0, accidentals = accidentals)
 }
 
 
