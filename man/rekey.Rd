@@ -12,6 +12,7 @@ rekey(tone_mat, tone0 = NULL, accidentals = NULL)
 \item{tone0}{\emph{Optional}: Name of the note to use as the lead tone of the matrix.}
 
 \item{accidentals}{\emph{Optional}: Character scalar that determines whether accidentals should be represented as sharps (\code{accidentals} = "sharps") or flats (\code{accidentals} = "flats"); default value is \code{NULL}.
+\code{accidentals} can also be set to "integers" when one wishes to obtain a 12-tone matrix of numeric indices rather than notes.
 When \code{accidentals} is \code{NULL}, matrices created from pre-specified vectors of notes will use the original set of accidentals, whereas
 random matrices and matrices created from vectors of numeric indices will default to sharp notation.}
 }
