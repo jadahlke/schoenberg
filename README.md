@@ -1,4 +1,4 @@
-schoenberg: Twelve-Tone Musical Composition Package for R
+schoenberg: 12-Tone Musical Composition Package for R
 ======================================
 
 ## Overview

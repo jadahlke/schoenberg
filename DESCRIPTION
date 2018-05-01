@@ -1,6 +1,6 @@
 Package: schoenberg
 Type: Package
-Title: Twelve-Tone Musical Composition Package for R
+Title: 12-Tone Musical Composition Package for R
 Version: 1.0.0
 Date: 2018-05-01
 Author: Jeffrey A. Dahlke <dahlk068@umn.edu>
