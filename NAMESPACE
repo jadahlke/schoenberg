@@ -3,3 +3,4 @@
 S3method(print,schoenberg)
 export(rekey)
 export(schoenberg)
+exportClasses(schoenberg)

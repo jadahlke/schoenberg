@@ -226,15 +226,3 @@ rekey <- function(tone_mat, tone0 = NULL, accidentals = NULL){
           stop("'tone_mat' must be of class 'schoenberg'", call. = FALSE)
      schoenberg(prime0 = as.matrix(tone_mat)[1,], tone0 = tone0, accidentals = accidentals)
 }
-
-
-#' print method for objects of the "schoenberg" class.
-#'
-#' @param x Object to be printed.
-#' @param ... Further arguments passed to or from other methods.
-#'
-#' @return Printed results from objects of the "schoenberg" class.
-#' @export
-print.schoenberg <- function(x, ...){
-     print.data.frame(x)
-}
