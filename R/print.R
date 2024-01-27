@@ -12,7 +12,6 @@ NULL
 
 #' @export
 #' @keywords internal
-#' @exportClass schoenberg
 #' @method print schoenberg
 print.schoenberg <- function(x, ...){
      rnames <- rownames(x)
